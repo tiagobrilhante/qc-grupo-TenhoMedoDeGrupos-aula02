@@ -1,3 +1,8 @@
+# ATENÇÃO (Cloud Shell / disco pequeno): NÃO faça `pip install -r requirements.txt` direto —
+# o sentence-transformers puxa ~3GB de torch CUDA e estoura o disco. Instale o torch CPU antes:
+#   pip install --user --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install --user --no-cache-dir --no-deps sentence-transformers
+# depois o resto (ver README / scripts/run_n3.sh).
 sentence-transformers
 azure-search-documents
 azure-storage-blob

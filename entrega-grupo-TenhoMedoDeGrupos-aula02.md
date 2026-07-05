@@ -13,11 +13,16 @@ Itens que ainda precisam ser **executados e preenchidos** com os números reais 
 
 | # | Item a testar / preencher                                              | Ex. | Como obter                          | Status | Ir                          |
 |---|------------------------------------------------------------------------|-----|-------------------------------------|--------|-----------------------------|
-| 1 | Top-3 + scores das 3 queries de vector search                          | 3.1 | rodar `scripts/vector_search.py`    | ⬜      | [ir](#pend-31-resultados)   |
-| 2 | Ajustar o texto de comparação (vector × semantic) com o resultado real | 3.1 | após o item 1                       | ⬜      | [ir](#pend-31-comparacao)   |
-| 3 | Bytes processados pela query no Synapse                                | 3.2 | aba **Resultados** no Synapse Studio | ⬜      | [ir](#pend-32-bytes)        |
-| 4 | Latência média (10 queries) — SQL, Cosmos, AI Search                   | 3.3 | benchmark das 3 opções              | ⬜      | [ir](#pend-33-latencias)    |
-| 5 | Fechar a recomendação com os números medidos                           | 3.3 | após o item 4                       | ⬜      | [ir](#pend-33-recomendacao) |
+| 1 | Top-3 + scores das 3 queries de vector search                          | 3.1 | rodar `scripts/vector_search.py`    | ✅      | [ir](#pend-31-resultados)   |
+| 2 | Ajustar o texto de comparação (vector × semantic) com o resultado real | 3.1 | após o item 1                       | ✅      | [ir](#pend-31-comparacao)   |
+| 3 | Bytes processados pela query no Synapse                                | 3.2 | aba **Resultados** no Synapse Studio | 🚫     | [ir](#pend-32-bytes)        |
+| 4 | Latência média (10 queries) — SQL, Cosmos, AI Search                   | 3.3 | benchmark das 3 opções              | 🚫     | [ir](#pend-33-latencias)    |
+| 5 | Fechar a recomendação com os números medidos                           | 3.3 | após o item 4                       | 🚫     | [ir](#pend-33-recomendacao) |
+
+> ✅ = medido no nosso ambiente · 🚫 = bloqueado pela **política da subscription FIAP**: as regiões liberadas
+> (`eastus`, `brazilsouth`, `canadacentral`, `northcentralus`, `chilecentral`) **não aceitam criação de Azure SQL/Synapse**
+> (`SqlServerRegionDoesNotAllowProvisioning`), e o `centralus` (que aceitaria) está bloqueado por política de região.
+> Sem Synapse (3.2) e sem SQL/Cosmos (3.3), esses números não puderam ser medidos — é limite do ambiente, não do código.
 
 ## Grupo
 
@@ -451,17 +456,25 @@ Resultados das 3 queries:
 
 | Query                                          | Top-3 (vector search) | Score aprox. |
 |------------------------------------------------|-----------------------|--------------|
-| "preciso de uma cadeira boa para minha coluna" | ⟵ PREENCHER           | ⟵ PREENCHER  |
-| "algo para acompanhar séries"                  | ⟵ PREENCHER           | ⟵ PREENCHER  |
-| "presente para um amigo que ama café"          | ⟵ PREENCHER           | ⟵ PREENCHER  |
+| "preciso de uma cadeira boa para minha coluna" | 1. Cadeira Gamer Vermelha · 2. Cadeira Home Office Confortável · 3. Camiseta Polo Masculina | 0.685 · 0.684 · 0.667 |
+| "algo para acompanhar séries"                  | 1. Camiseta Polo Masculina · 2. Mochila para Notebook 15.6 · 3. Cafeteira Italiana 6 Xícaras | 0.624 · 0.608 · 0.595 |
+| "presente para um amigo que ama café"          | 1. Cafeteira Italiana 6 Xícaras · 2. Cafeteira Nespresso Essenza Mini · 3. Cadeira Gamer Vermelha | 0.682 · 0.678 · 0.613 |
 
 <a id="pend-31-comparacao"></a>
 **Comparação com o semantic search do lab:** o **vector search** tende a acertar melhor consultas por
 *intenção/paráfrase* (ex.: "cadeira para minha coluna" → cadeira ergonômica), porque compara significado no espaço
 vetorial e não depende das palavras exatas. O **semantic search** do lab reordena resultados de uma busca lexical, então
 falha quando **nenhum termo bate** com o catálogo. O vector, por sua vez, pode trazer falsos vizinhos semanticamente
-próximos mas irrelevantes de negócio (ex.: acessório em vez do produto principal). ⟵ *ajustar com a observação real das
-3 queries.*
+próximos mas irrelevantes de negócio.
+
+**Observação real das 3 queries** (execução no nosso ambiente): o vector search **acertou por intenção**
+em 2 das 3. Em *"cadeira boa para minha coluna"* trouxe **Cadeira Gamer** (0.685) e **Cadeira Home Office** (0.684)
+no topo — mesmo sem a palavra "cadeira ergonômica" no catálogo. Em *"presente para quem ama café"* trouxe
+**Cafeteira Italiana** (0.682) e **Cafeteira Nespresso** (0.678). Já *"algo para acompanhar séries"* **falhou**: como
+não há TV/monitor no catálogo, o vetor retornou vizinhos irrelevantes (Camiseta, Mochila, Cafeteira) com scores
+baixos (0.59–0.62) — exatamente o caso de "falso vizinho semântico" quando **não existe produto adequado**. Note também
+que o 3º lugar da 1ª query (Camiseta Polo, 0.667) já é um falso positivo, mostrando que um **threshold de score** é
+necessário em produção para não recomendar itens fracamente relacionados.
 
 **Parte B — Reflexão**
 
@@ -572,8 +585,9 @@ print("3 arquivos gerados. Upload com: az storage blob upload-batch -d logs -s .
 **Query no Serverless SQL Pool:** executada conforme o enunciado (`OPENROWSET` sobre `compras_*.csv`).
 
 <a id="pend-32-bytes"></a>
-- **Bytes processados pela query:** ⟵ PREENCHER (aba "Resultados" do Synapse Studio — com 3×1.000 linhas CSV pequenas,
-  deve ficar na casa de **poucas centenas de KB**).
+- **Bytes processados pela query:** *não medido* — o Synapse **não pôde ser provisionado** na nossa subscription
+  (ver [Pendências](#-pendências-de-medição-n3)). Estimativa: com 3×1.000 linhas de CSV pequeno, ficaria na casa de
+  **poucas centenas de KB**.
 
 **Reflexão**
 
@@ -617,9 +631,9 @@ Query alvo: *"cadeira ergonômica para dor lombar"*.
 
 | Opção                                           | Latência média (10 queries) | Qualidade da resposta                                                                                       | Custo projetado (1M queries/mês)                            |
 |-------------------------------------------------|-----------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| **Azure SQL** `LIKE '%cadeira%'` + filtros      | ⟵ PREENCHER (~50–200ms)     | **Baixa** — casa só a palavra "cadeira"; ignora "ergonômica"/"lombar" (sem semântica); full scan escala mal | Incluído no custo fixo da instância, mas degrada com volume |
-| **Cosmos DB** (full-text via AI Search externo) | ⟵ PREENCHER                 | Média — Cosmos não tem full-text nativo; depende do salto extra ao AI Search                                | Custo do Cosmos (RU) **+** do AI Search                     |
-| **Azure AI Search** (semantic / vector)         | ⟵ PREENCHER (~100–300ms)    | **Alta** — entende intenção em linguagem natural; traz cadeira ergonômica mesmo sem match lexical exato     | S1 ~$250/mês (fixo) absorve 1M queries                      |
+| **Azure SQL** `LIKE '%cadeira%'` + filtros      | n/d · ~50–200ms (est.)      | **Baixa** — casa só a palavra "cadeira"; ignora "ergonômica"/"lombar" (sem semântica); full scan escala mal | Incluído no custo fixo da instância, mas degrada com volume |
+| **Cosmos DB** (full-text via AI Search externo) | n/d (não provisionado)      | Média — Cosmos não tem full-text nativo; depende do salto extra ao AI Search                                | Custo do Cosmos (RU) **+** do AI Search                     |
+| **Azure AI Search** (semantic / vector)         | ~100–300ms (est.); vetor validado no Ex. 3.1 | **Alta** — entende intenção em linguagem natural; traz cadeira ergonômica mesmo sem match lexical exato     | S1 ~$250/mês (fixo) absorve 1M queries                      |
 
 <a id="pend-33-recomendacao"></a>
 **Recomendação:** 
@@ -628,8 +642,12 @@ para o **agente de busca da QC**, usar **Azure AI Search com vector/semantic ran
 
 O agente recebe perguntas em **linguagem natural** ("algo pra minha dor nas costas"), e é exatamente aí que `LIKE` do SQL falha e
 o ranking semântico ganha. SQL continua ideal para filtros estruturados (preço, categoria, estoque) — a arquitetura
-final combina os dois: **AI Search para relevância semântica + SQL para filtros e integridade**. ⟵ *fechar com os
-números reais medidos no lab.*
+final combina os dois: **AI Search para relevância semântica + SQL para filtros e integridade**.
+
+> *Nota:* o benchmark cronometrado das 3 opções não pôde ser fechado com números reais porque **SQL e Cosmos não
+> puderam ser provisionados** nesta subscription (ver [Pendências](#-pendências-de-medição-n3)). O **AI Search foi
+> provisionado e validado** no Ex. 3.1 (vector search real com scores 0.59–0.68), o que sustenta a recomendação pela
+> qualidade semântica observada; as latências de SQL/Cosmos ficam como estimativa fundamentada.
 
 ---
 

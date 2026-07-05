@@ -88,6 +88,11 @@ def main():
     search_client.upload_documents(docs)
     print(f"✓ {len(docs)} produtos indexados com vetores")
 
+    # AI Search indexa de forma assíncrona; espera para os docs ficarem pesquisáveis
+    # antes de consultar (sem isso, a query logo após o upload volta vazia).
+    import time
+    time.sleep(12)
+
     # Busca por vetor: gerar embedding da query e buscar nearest
     queries = [
         "preciso de uma cadeira boa para minha coluna",
@@ -102,7 +107,7 @@ def main():
             vector_queries=[{
                 "kind": "vector",
                 "vector": q_vec,
-                "k_nearest_neighbors": 3,
+                "k": 3,  # azure-search-documents 12.x / API 2026-04-01 (antes: k_nearest_neighbors)
                 "fields": "content_vector",
             }],
         )

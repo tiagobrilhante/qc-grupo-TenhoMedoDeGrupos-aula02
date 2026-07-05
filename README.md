@@ -51,11 +51,15 @@ vetorial (HNSW), depois roda 3 queries por similaridade.
 az storage blob upload -c catalogo -f data/produtos.csv -n produtos.csv \
   --account-name "$STORAGE_ACCOUNT_NAME" --auth-mode login
 
-# 2) rodar o vector search (usa $SEARCH_ENDPOINT e $STORAGE_ACCOUNT_NAME do passo 1)
-cd scripts
-pip install --user -r requirements.txt   # baixa modelo ~80MB no 1º uso
-python vector_search.py
-cd ..
+# 2) instalar deps — no Cloud Shell (disco de 5GB) instale o torch CPU-only primeiro,
+#    senão o pip puxa ~3GB de pacotes CUDA e estoura o disco ([Errno 28] No space left):
+pip install --user --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+pip install --user --no-cache-dir --no-deps sentence-transformers
+pip install --user --no-cache-dir transformers huggingface-hub tokenizers safetensors \
+  scikit-learn scipy pillow tqdm azure-search-documents azure-storage-blob azure-identity
+
+# 3) rodar o vector search (baixa o modelo ~80MB no 1º uso)
+cd scripts && python vector_search.py && cd ..
 ```
 
 Saída: as 3 queries de exemplo com os Top-3 produtos por similaridade vetorial.
