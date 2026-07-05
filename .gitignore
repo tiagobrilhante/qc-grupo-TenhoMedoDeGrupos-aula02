@@ -1,0 +1,17 @@
+# IDE / SO (não fazem parte do projeto)
+.idea
+.DS_Store
+
+# Artefatos de runtime do Terraform (nunca versionar; o state pode conter dados sensíveis)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Dados de exemplo gerados pelo scripts/gerar_logs.py
+logs_compras_*.csv
