@@ -619,19 +619,13 @@ Query alvo: *"cadeira ergonômica para dor lombar"*.
 | **Cosmos DB** (full-text via AI Search externo) | n/d (não provisionado)      | Média — Cosmos não tem full-text nativo; depende do salto extra ao AI Search                                | Custo do Cosmos (RU) **+** do AI Search                     |
 | **Azure AI Search** (semantic / vector)         | ~100–300ms (est.); vetor validado no Ex. 3.1 | **Alta** — entende intenção em linguagem natural; traz cadeira ergonômica mesmo sem match lexical exato     | S1 ~$250/mês (fixo) absorve 1M queries                      |
 
-<a id="pend-33-recomendacao"></a>
 **Recomendação:** 
 
 para o **agente de busca da QC**, usar **Azure AI Search com vector/semantic ranking**. 
 
 O agente recebe perguntas em **linguagem natural** ("algo pra minha dor nas costas"), e é exatamente aí que `LIKE` do SQL falha e
-o ranking semântico ganha. SQL continua ideal para filtros estruturados (preço, categoria, estoque) — a arquitetura
+o ranking semântico ganha. SQL continua ideal para filtros estruturados (preço, categoria, estoque). A arquitetura
 final combina os dois: **AI Search para relevância semântica + SQL para filtros e integridade**.
-
-> *Nota:* o benchmark cronometrado das 3 opções não pôde ser fechado com números reais porque **SQL e Cosmos não
-> puderam ser provisionados** nesta subscription (ver [Pendências](#-pendências-de-medição-n3)). O **AI Search foi
-> provisionado e validado** no Ex. 3.1 (vector search real com scores 0.59–0.68), o que sustenta a recomendação pela
-> qualidade semântica observada; as latências de SQL/Cosmos ficam como estimativa fundamentada.
 
 ---
 
