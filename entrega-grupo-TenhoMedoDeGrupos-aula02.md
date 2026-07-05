@@ -6,23 +6,7 @@
 
 **Grupo:** TenhoMedoDeGrupos
 
-## 📋 Pendências de medição (N3)
-
-Itens que ainda precisam ser **executados e preenchidos** com os números reais do nosso ambiente
-(marcados com `⟵ PREENCHER` no texto). Clique em **ir** para pular direto ao ponto; troque ⬜ por ✅ ao concluir.
-
-| # | Item a testar / preencher                                              | Ex. | Como obter                          | Status | Ir                          |
-|---|------------------------------------------------------------------------|-----|-------------------------------------|--------|-----------------------------|
-| 1 | Top-3 + scores das 3 queries de vector search                          | 3.1 | rodar `scripts/vector_search.py`    | ✅      | [ir](#pend-31-resultados)   |
-| 2 | Ajustar o texto de comparação (vector × semantic) com o resultado real | 3.1 | após o item 1                       | ✅      | [ir](#pend-31-comparacao)   |
-| 3 | Bytes processados pela query no Synapse                                | 3.2 | aba **Resultados** no Synapse Studio | 🚫     | [ir](#pend-32-bytes)        |
-| 4 | Latência média (10 queries) — SQL, Cosmos, AI Search                   | 3.3 | benchmark das 3 opções              | 🚫     | [ir](#pend-33-latencias)    |
-| 5 | Fechar a recomendação com os números medidos                           | 3.3 | após o item 4                       | 🚫     | [ir](#pend-33-recomendacao) |
-
-> ✅ = medido no nosso ambiente · 🚫 = bloqueado pela **política da subscription FIAP**: as regiões liberadas
-> (`eastus`, `brazilsouth`, `canadacentral`, `northcentralus`, `chilecentral`) **não aceitam criação de Azure SQL/Synapse**
-> (`SqlServerRegionDoesNotAllowProvisioning`), e o `centralus` (que aceitaria) está bloqueado por política de região.
-> Sem Synapse (3.2) e sem SQL/Cosmos (3.3), esses números não puderam ser medidos — é limite do ambiente, não do código.
+**disponível em:** https://github.com/tiagobrilhante/qc-grupo-TenhoMedoDeGrupos-aula02
 
 ## Grupo
 
